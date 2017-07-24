@@ -1,10 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>find keywords in text</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Генератор ключевых слов из текста</title>
+  <meta name="description" content="">
 </head>
 <body>
+  <main>
+<h2>Генератор ключевых слов из текста:</h2>
+<form action="" method="get" onsubmit="return false;">
+  <div class="bb_sp_wrap">
+      <div class="bb_sp_body">
+        <h3>Минимальная длина слова</h3>
+        <input class="button1" value="4" id="minLengthKeyword" type="text"> <br> 
+        <h3>Минимальное число повторений</h3>
+        <input class="button1" value="2" id="minRepeatKeyword" type="text"> <br> 
+        <h3>Коэффициент совпадения: ( например - keyword ~ keywords)</h3>
+        <input class="button1" value="0.7" id="coincidence" type="text"> <br> 
+        <h3>Игнорируемые слова при анализе:</h3>
+        <textarea class="inputbox" id="exIgnore" cols="100" rows="3">для,что,или,это,этих,потому,поэтому,просто,очень,всех,они,оно,еще,когда,тогда,которые,того,где,эта,лишь,уже,вам,нет,если,надо,все,так,мне,он,лучше,здесь,сразу,знают,стоят,можно,других,статье,часть,</textarea>
+        <br class="clear">
+      </div>
+  </div>
+  <h3>Результат, часто повторяющиеся слова</h3>
+  <textarea class="inputbox" id="exKeywords" cols="100" rows="3"></textarea>
+  <h3>Введите текст для анализа keywords:</h3>
+  <textarea style="line-height:1.4;" class="inputbox" id="exText" cols="100" rows="20">Инвестиционная мантра Баффета звучит так: "Покажите мне прибыль и живые деньги". Он покупает акции компаний, способных генерировать достаточный денежный поток для расширения собственного бизнеса, своего рода "дойных коров", избегая при этом "собак" наподобие горнодобывающих компаний, требующих огромных капиталовложений лишь для поддержания оборудования в рабочем состоянии. Стандартный показатель чистого денежного потока рассчитывается как чистая прибыль на акцию плюс амортизация на акцию. Последняя представляет собой неденежный вычет из прибыли на возобновление основных средств и других необоротных активов в результате физического и морального износа. Баффет также использует данную методику расчета денежного потока, но с одной особенностью: из денежного потока вычитаются капитальные затраты, т.е. затраты на модернизацию и поддержание в рабочем состоянии производственных мощностей. Он назвал этот показатель чистой прибылью акционера. </textarea>
+  <br> <input class="button1" value="Сгенерировать слова" onclick="countKeywords()" type="button"> <input class="button2" value="Очистить форму" onclick="clearForm()" type="button"> 
+</form>
+  </main>
+  <footer>
+    <script>
+      var keywords1, keywords2 = new Array(), keywords3 =  new Array();
+      function getWords(s) {	
+        return s.replace(/[^а-яА-Яa-zA-Z]+/g, " ").toLowerCase(); // Возвращаем массив только из букв
+      }
+      function getKeywords(s) {
+        var tmp;
+        tmp = getWords(s);
+        return tmp.split(" "); // Возвращаем массив тегов
+      }
+      function countKeywords () {
+        var s = document.getElementById('exText').value; // Получаем текст из которого нужно выделить теги
+        var minLengthKeyword = parseInt(document.getElementById('minLengthKeyword').value);
+        var minRepeatKeyword = parseInt(document.getElementById('minRepeatKeyword').value);
+        var coincidence = parseFloat(document.getElementById('coincidence').value);
+        var ignore = document.getElementById('exIgnore').value.split(',').join('|');
+        var rex=new RegExp('('+ignore+')','ig');
+        var tmpKeywords1 = getKeywords(s.replace(rex,''));
+        var tmpIgnore = getWords(ignore);
+        var tmpKeywords2 = new Array();
+        //alert(keywords1.length);
+        for (i=0;i<tmpKeywords1.length;i++) {
+          var currentWord = tmpKeywords1[i];
+          //alert(currentWord.substring(0, 3) );
+          if (currentWord.length >= minLengthKeyword) {
+            
+            keywords2.push(currentWord);
+          }
+        }
 
+
+        for (i=0;i<keywords2.length;i++) {
+          var currentWord = keywords2[i];
+          currentWordCore = currentWord.substr(0,Math.round(currentWord.length*coincidence));
+          //alert(currentWordCore);
+          var inwords2 = keywords2.grep(currentWordCore);
+          //alert(inwords2);
+          if (inwords2.length >= minRepeatKeyword && keywords3.grep(currentWordCore).length <1) { 
+            keywords3.push(currentWord);
+          }
+        }	
+        document.getElementById('exKeywords').innerHTML = keywords3.join(', ');
+        keywords2 = new Array();
+        keywords3 = new Array();
+      }
+      function grep(str) {
+        var ar = new Array();
+        var arSub = 0;
+        for (var i in this) {
+          if (typeof this[i] == "string" && this[i].indexOf(str) != -1){
+            ar[arSub] = this[i];
+            arSub++;
+          }
+        }
+        return ar;
+      }
+      Array.prototype.remove=function(s){
+        for(i=0;i<this.length;i++){
+          if(s==this[i]){
+            this.splice(i, 1);
+          }
+        }
+      }
+
+      Array.prototype.grep = grep;
+      function clearForm(){document.getElementById('exKeywords').innerHTML='';document.getElementById('exText').value=''}
+    </script>
+  </footer>
 </body>
 </html>
